@@ -1,16 +1,24 @@
 import { useEffect, useContext } from 'react';
-import GithubContext from '../context/github/GithubContext';
 import { useParams } from 'react-router-dom';
 import { FaCodepen, FaStore, FaUserFriends, FaUsers } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import GithubContext from '../context/github/GithubContext';
+import RepoList from '../components/repos/RepoList';
+import { getUserAndRepos } from '../context/github/GithubActions';
 
 const User = () => {
-  const { getUser, user, loading } = useContext(GithubContext);
+  const { user, loading, repos, dispatch } = useContext(GithubContext);
 
   const params = useParams();
 
   useEffect(() => {
-    getUser(params.login);
+    dispatch({ type: 'SET_LOADING' });
+    const getUserData = async () => {
+      const userData = await getUserAndRepos(params.login);
+      dispatch({ type: 'GET_USER_AND_REPOS', payload: userData });
+    };
+
+    getUserData();
   }, []);
 
   const {
@@ -41,7 +49,7 @@ const User = () => {
             Back to Search
           </Link>
         </div>
-        <div className="grid grid-cols-1 xl:grid-cols-3 lg:grid-cols-3 md:grid-cols-3 mb-8 md:gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-3 lg:grid-cols-3 md:grid-cols-2 mb-8 md:gap-8">
           <div className="custom-card-image mb-6 md:mb-0">
             <div className="rounded-lg shadow-xl card image-full">
               <figure>
@@ -54,7 +62,7 @@ const User = () => {
             </div>
           </div>
 
-          <div className="call-span-2">
+          <div className="col-span-2">
             <div className="mb-6">
               <h1 className="text-3xl card-title">
                 {name}
@@ -151,6 +159,7 @@ const User = () => {
             </div>
           </div>
         </div>
+        <RepoList repos={repos} />
       </div>
     </>
   );
